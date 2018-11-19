@@ -22,10 +22,9 @@ import (
 	"strings"
 
 	osconfigpb "github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/osconfig_agent/_internal/gapi-cloud-osconfig-go/google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha1"
+	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/osconfig_agent/config"
 	"github.com/GoogleCloudPlatform/compute-image-tools/go/packages"
 )
-
-const googetRepoFile = "C:/ProgramData/GooGet/repos/google_osconfig.repo"
 
 func setOsConfig(res *osconfigpb.LookupConfigsResponse) error {
 	var errs []string
@@ -63,7 +62,7 @@ func gooRepositories(repos []*osconfigpb.GooRepository) error {
 		buf.WriteString(fmt.Sprintf("  url: %s\n", repo.Url))
 	}
 
-	return ioutil.WriteFile(googetRepoFile, buf.Bytes(), 0600)
+	return ioutil.WriteFile(config.GoogetRepoFilePath(), buf.Bytes(), 0600)
 }
 
 func gooInstalls(pkgs []*osconfigpb.Package) error {

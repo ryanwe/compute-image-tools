@@ -22,33 +22,28 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"net/http"
 	"os"
 	"time"
 
 	osconfig "github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/osconfig_agent/_internal/gapi-cloud-osconfig-go/cloud.google.com/go/osconfig/apiv1alpha1"
+	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/osconfig_agent/config"
 	"github.com/GoogleCloudPlatform/compute-image-tools/go/service"
 	"github.com/kylelemons/godebug/pretty"
 	"google.golang.org/api/option"
 )
 
 var (
-	oauth    = flag.String("oauth", "", "path to oauth json file")
-	resource = flag.String("resource", "", "projects/*/zones/*/instances/*")
-	endpoint = flag.String("endpoint", "osconfig.googleapis.com:443", "osconfig endpoint override")
-	logger   = log.New(os.Stdout, "", 0)
+	logger = log.New(os.Stdout, "", 0)
 )
 
 var dump = &pretty.Config{IncludeUnexported: true}
 
 const (
-	// TODO: make interval configurable.
-	interval          = 10 * time.Minute
 	instanceMetadata  = "http://metadata.google.internal/computeMetadata/v1/instance"
 	metadataRecursive = instanceMetadata + "/?recursive=true&alt=json"
 	reportURL         = instanceMetadata + "/guest-attributes"
-	maxRetryDelay     = 30
+	resource          = "projects/*/zones/*/instances/*"
 )
 
 type metadataJSON struct {
@@ -76,7 +71,11 @@ func getResourceName(r string) (string, error) {
 		if err == nil {
 			break
 		}
-		rt := time.Duration(math.Min(float64(3*i), maxRetryDelay)) * time.Second
+		rt := time.Duration(3*i) * time.Second
+		maxRetryDelay := config.MaxMetadataRetryDelay()
+		if rt > maxRetryDelay {
+			rt = maxRetryDelay
+		}
 		logger.Printf("Error connecting to metadata server (error number: %d), retrying in %s, error: %v\n", i, rt, err)
 		time.Sleep(rt)
 	}
@@ -121,18 +120,18 @@ func postAttribute(url string, value io.Reader) error {
 }
 
 func run(ctx context.Context) {
-	client, err := osconfig.NewClient(ctx, option.WithEndpoint(*endpoint), option.WithCredentialsFile(*oauth))
+	client, err := osconfig.NewClient(ctx, option.WithEndpoint(config.SvcEndpoint()), option.WithCredentialsFile(config.OAuthPath()))
 	if err != nil {
 		log.Fatalln("NewClient Error:", err)
 	}
 
-	res, err := getResourceName(*resource)
+	res, err := getResourceName(resource)
 	if err != nil {
 		log.Fatalln("getResourceName error:", err)
 	}
 
 	patchInit()
-	ticker := time.NewTicker(interval)
+	ticker := time.NewTicker(config.SvcPollInterval())
 	for {
 		resp, err := lookupConfigs(ctx, client, res)
 		if err != nil {

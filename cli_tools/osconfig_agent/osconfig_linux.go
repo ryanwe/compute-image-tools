@@ -22,10 +22,9 @@ import (
 	"strings"
 
 	osconfigpb "github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/osconfig_agent/_internal/gapi-cloud-osconfig-go/google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha1"
+	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/osconfig_agent/config"
 	"github.com/GoogleCloudPlatform/compute-image-tools/go/packages"
 )
-
-const zypperRepoFile = "/etc/zypp/repos.d/google_osconfig.repo"
 
 func setOsConfig(res *osconfigpb.LookupConfigsResponse) error {
 	var errs []string
@@ -106,7 +105,7 @@ func zypperRepositories(repos []*osconfigpb.ZypperRepository) error {
 		buf.WriteString(fmt.Sprintf("  url: %s\n", repo.BaseUrl))
 	}
 
-	return ioutil.WriteFile(zypperRepoFile, buf.Bytes(), 0600)
+	return ioutil.WriteFile(config.ZypperRepoFilePath(), buf.Bytes(), 0600)
 }
 
 func zypperInstalls(pkgs []*osconfigpb.Package) error {
