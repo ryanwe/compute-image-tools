@@ -20,14 +20,14 @@ import (
 	"os"
 	"time"
 
-	"cloud.google.com/go/compute/metadata"
-	osconfig "github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/_internal/gapi-cloud-osconfig-go/cloud.google.com/go/osconfig/apiv1alpha1"
+//	"cloud.google.com/go/compute/metadata"
+//	osconfig "github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/_internal/gapi-cloud-osconfig-go/cloud.google.com/go/osconfig/apiv1alpha1"
 	osconfigpb "github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/_internal/gapi-cloud-osconfig-go/google.golang.org/genproto/googleapis/cloud/osconfig/v1alpha1"
-	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/config"
+//	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/config"
 	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/logger"
 	"github.com/GoogleCloudPlatform/compute-image-tools/cli_tools/google-osconfig-agent/tasker"
 	"github.com/golang/protobuf/jsonpb"
-	"google.golang.org/api/option"
+//	"google.golang.org/api/option"
 )
 
 type patchStep string
@@ -337,6 +337,15 @@ func reportPatchDetails(ctx context.Context, patchJobName string, patchState osc
 
 	logger.Infof("Reporting patch details name:'%s', state:'%s', failReason:'%s'", patchJobName, patchState, failureReason)
 
+	res := &osconfigpb.ReportPatchJobInstanceDetailsResponse{
+		PatchJobName: patchJobName,
+		PatchJobState: osconfigpb.ReportPatchJobInstanceDetailsResponse_ACTIVE,
+		DryRun: false,
+		PatchConfig: &osconfigpb.PatchConfig{},
+	}
+	return res, nil
+
+	/*
 	client, err := osconfig.NewClient(ctx, option.WithEndpoint(config.SvcEndpoint()), option.WithCredentialsFile(config.OAuthPath()))
 	if err != nil {
 		logger.Errorf("osconfig.NewClient Error: %v", err)
@@ -370,4 +379,5 @@ func reportPatchDetails(ctx context.Context, patchJobName string, patchState osc
 
 	res, err := client.ReportPatchJobInstanceDetails(ctx, &request)
 	return res, err
+	*/
 }
