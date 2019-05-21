@@ -38,7 +38,7 @@ import (
 )
 
 const (
-	testSuiteName = "PatchTests"
+	testSuiteName = "PatchTests_PublicImages"
 )
 
 var (
@@ -52,8 +52,8 @@ type patchTestSetup struct {
 	assertTimeout time.Duration
 }
 
-// TestSuite is a PatchTests test suite.
-func TestSuite(ctx context.Context, tswg *sync.WaitGroup, testSuites chan *junitxml.TestSuite, logger *log.Logger, testSuiteRegex, testCaseRegex *regexp.Regexp, testProjectConfig *testconfig.Project) {
+// ExecutePatchTestSuite is a PatchTests test suite.
+func ExecutePatchTestSuite(ctx context.Context, tswg *sync.WaitGroup, testSuites chan *junitxml.TestSuite, logger *log.Logger, testSuiteRegex, testCaseRegex *regexp.Regexp, testProjectConfig *testconfig.Project) {
 	defer tswg.Done()
 
 	if testSuiteRegex != nil && !testSuiteRegex.MatchString(testSuiteName) {

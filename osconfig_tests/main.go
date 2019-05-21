@@ -51,7 +51,8 @@ var (
 var testFunctions = []func(context.Context, *sync.WaitGroup, chan *junitxml.TestSuite, *log.Logger, *regexp.Regexp, *regexp.Regexp, *testconfig.Project){
 	packagemanagement.TestSuite,
 	inventory.TestSuite,
-	patch.TestSuite,
+	patch.ExecutePatchTestSuite,
+	patch.ExecutePatchOldImagesTestSuite,
 }
 
 func main() {
